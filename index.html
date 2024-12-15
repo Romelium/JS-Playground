@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>JavaScript Playground</title>
+    <style>
+        :root {
+            --primary-color: #007BFF;
+            --hover-color: #0056b3;
+            --success-color: #28a745;
+            --background-color: #f7f7f7;
+            --container-bg: #fff;
+            --border-color: #ddd;
+            --text-color: #333;
+            --input-bg: #f4f4f4;
+            --font-family: 'Arial', sans-serif;
+            --font-size-base: 16px;
+            --font-size-heading: 2.5rem;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--background-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            box-sizing: border-box;
+            color: var(--text-color);
+        }
+
+        header {
+            text-align: center;
+            padding: 20px;
+            width: 100%;
+        }
+
+        h1 {
+            color: var(--text-color);
+            font-size: clamp(1.5rem, 5vw, var(--font-size-heading));
+            margin: 0;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 30px auto;
+            padding: 20px;
+            background-color: var(--container-bg);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            box-sizing: border-box;
+            transition: box-shadow 0.3s ease;
+        }
+
+        .container:hover {
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+        }
+
+        textarea {
+            width: 100%;
+            height: 200px;
+            font-family: monospace;
+            font-size: var(--font-size-base);
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background-color: var(--input-bg);
+            margin-bottom: 15px;
+            resize: none;
+            box-sizing: border-box;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        textarea:focus {
+            border-color: var(--primary-color);
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: var(--primary-color);
+            color: white;
+            font-size: var(--font-size-base);
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            box-sizing: border-box;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        button:hover {
+            background-color: var(--hover-color);
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        .output {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: var(--container-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            min-height: 50px;
+            font-family: monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+            color: var(--text-color);
+            overflow-y: auto;
+            box-sizing: border-box;
+        }
+
+        .copy-btn {
+            margin-top: 10px;
+            background-color: var(--success-color);
+            width: auto;
+            padding: 8px 12px;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            background-color: #218838;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            h1 {
+                font-size: clamp(1.2rem, 4vw, 2rem);
+            }
+
+            textarea {
+                height: 150px;
+                font-size: 14px;
+            }
+
+            button {
+                font-size: 14px;
+            }
+
+            .output {
+                font-size: 12px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                padding: 10px;
+            }
+
+            textarea {
+                height: 120px;
+            }
+
+            button {
+                font-size: 14px;
+            }
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <header>
+        <h1>JavaScript Playground</h1>
+    </header>
+
+    <main class="container">
+        <textarea id="jsCode" placeholder="Write your JavaScript code here..."
+            aria-label="JavaScript code editor"></textarea>
+        <button id="runBtn" aria-label="Run JavaScript code">Run Code</button>
+        <button id="copyBtn" class="copy-btn" aria-label="Copy output">Copy Output</button>
+        <div id="output" class="output" role="region" aria-live="polite" aria-relevant="additions text"></div>
+    </main>
+
+    <script>
+        // Save the original console.log function
+        const originalConsoleLog = console.log;
+
+        // Override console.log to display logs in the output div
+        console.log = function (message) {
+            const outputDiv = document.getElementById('output');
+            outputDiv.textContent += message + '\n';  // Append the message to the output
+            originalConsoleLog.apply(console, arguments); // Optionally keep logging to the browser console
+        };
+
+        // Function to run the user's code
+        async function runCode() {
+            const code = document.getElementById('jsCode').value;
+            const outputDiv = document.getElementById('output');
+            outputDiv.textContent = ''; // Clear previous output
+
+            try {
+                // Using the Function constructor to safely execute the code
+                const func = new Function(code);
+                await func();  // Execute the code asynchronously
+            } catch (error) {
+                // Display error message if the code has issues
+                outputDiv.textContent = `Error: ${error.message}`;
+            }
+        }
+
+        // Function to copy output text to the clipboard
+        async function copyOutput() {
+            const outputDiv = document.getElementById('output');
+            const textToCopy = outputDiv.textContent;
+
+            try {
+                await navigator.clipboard.writeText(textToCopy);
+                alert('Output copied to clipboard!');
+            } catch (err) {
+                alert(`Failed to copy text: ${err.message}`);
+            }
+        }
+
+        // Event listeners for button interactions
+        document.getElementById('runBtn').addEventListener('click', runCode);
+        document.getElementById('copyBtn').addEventListener('click', copyOutput);
+    </script>
+
+</body>
+
+</html>
